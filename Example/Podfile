@@ -1,0 +1,7 @@
+use_frameworks!
+target 'KEYBatchRequest_Tests' do
+  pod 'KEYBatchRequest', :path => '../'
+  
+  pod 'Specta'
+  pod 'Expecta'
+end
