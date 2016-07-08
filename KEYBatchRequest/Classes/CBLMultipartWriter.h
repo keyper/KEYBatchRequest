@@ -39,6 +39,8 @@
 
 - (void) addGZippedData: (NSData*)data;
 
+- (void) addBatchedRequest:(NSURLRequest *)request;
+
 // See commented out implementation for notes
 //- (CBLStatus) addAttachment: (CBL_Attachment*)attachment;
 

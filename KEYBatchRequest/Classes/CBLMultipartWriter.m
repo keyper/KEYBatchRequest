@@ -61,6 +61,35 @@
     _nextPartsHeaders = headers;
 }
 
+// Adds the request as part of a multipart/mixed batch request. It could look like this:
+//
+// --batch_0cac279a-09b2-4ec1-a7a5-67670bdfec5f
+// Content-Type: application/http; msgtype=request
+// GET /api/events HTTP/1.1
+// Host: yourhostname.com
+// Authorization: your-auth-header-value
+//
+- (void)addBatchedRequest:(NSURLRequest *)request {
+    
+    // Boundary
+    NSMutableString *part = [NSMutableString stringWithFormat: @"\r\n--%@\r\n", _boundary];
+    
+    // Content-Type
+    [part appendString:@"Content-Type: application/http; msgtype=request\r\n"];
+    
+    // Path
+    [part appendString:[NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", request.HTTPMethod, request.URL.path]];
+    
+    // Host
+    [part appendString:[NSString stringWithFormat:@"Host: %@\r\n", request.URL.host]];
+    
+    // All headers
+    for (NSString *header in request.allHTTPHeaderFields.allKeys) {
+        [part appendString:[NSString stringWithFormat:@"%@: %@\r\n", header, request.allHTTPHeaderFields[header]]];
+    }
+    
+    [super addInput:[part dataUsingEncoding:NSUTF8StringEncoding] length:part.length];
+}
 
 // Overridden to prepend the MIME multipart separator+headers
 - (void) addInput: (id)part length:(UInt64)length {
