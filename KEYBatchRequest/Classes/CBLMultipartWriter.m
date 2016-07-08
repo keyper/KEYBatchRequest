@@ -75,7 +75,7 @@
     NSMutableString *part = [NSMutableString stringWithFormat: @"\r\n--%@\r\n", _boundary];
     
     // Content-Type
-    [part appendString:@"Content-Type: application/http; msgtype=request\r\n"];
+    [part appendString:@"Content-Type: application/http; msgtype=request\r\n\r\n"];
     
     // Path
     [part appendString:[NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", request.HTTPMethod, request.URL.path]];
@@ -87,6 +87,8 @@
     for (NSString *header in request.allHTTPHeaderFields.allKeys) {
         [part appendString:[NSString stringWithFormat:@"%@: %@\r\n", header, request.allHTTPHeaderFields[header]]];
     }
+    
+    [part appendString:@"\r\n"];
     
     [super addInput:[part dataUsingEncoding:NSUTF8StringEncoding] length:part.length];
 }
