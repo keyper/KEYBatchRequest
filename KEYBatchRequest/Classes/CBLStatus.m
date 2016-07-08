@@ -16,7 +16,7 @@
 //  Modifications copyright (c) 2016 keyper GmbH
 
 #import "CBLStatus.h"
-#import "MYErrorUtils.h"
+//#import "MYErrorUtils.h"
 
 
 NSString* const CBLHTTPErrorDomain = @"CBLHTTP";
@@ -81,9 +81,11 @@ NSError* CBLStatusToNSErrorWithInfo( CBLStatus status, NSString *reason, NSURL* 
     NSString* statusMessage;
     status = CBLStatusToHTTPStatus(status, &statusMessage);
     reason = reason != nil ? reason : statusMessage;
-    NSMutableDictionary* info = $mdict({NSURLErrorFailingURLErrorKey, url},
-                                       {NSLocalizedFailureReasonErrorKey, reason},
-                                       {NSLocalizedDescriptionKey, reason});
+    NSMutableDictionary* info = @{
+                                  NSURLErrorFailingURLErrorKey: url,
+                                  NSLocalizedFailureReasonErrorKey: reason,
+                                  NSLocalizedDescriptionKey: reason
+                                  }.mutableCopy;
     if (extraInfo)
         [info addEntriesFromDictionary: extraInfo];
     return [NSError errorWithDomain: CBLHTTPErrorDomain code: status userInfo: info];
@@ -129,9 +131,9 @@ CBLStatus CBLStatusFromNSError(NSError* error, CBLStatus defaultStatus) {
     NSInteger code = error.code;
     if (!error) {
         return kCBLStatusOK;
-    } else if ($equal(error.domain, CBLHTTPErrorDomain)) {
+    } else if ([error.domain isEqualToString: CBLHTTPErrorDomain]) {
         return (CBLStatus)code;
-    } else if ($equal(error.domain, NSURLErrorDomain)) {
+    } else if ([error.domain isEqualToString: NSURLErrorDomain]) {
         for (unsigned i=0; i < sizeof(kURLErrorToStatusMap)/sizeof(kURLErrorToStatusMap[0]); ++i) {
             if (kURLErrorToStatusMap[i].code == code)
                 return kURLErrorToStatusMap[i].status;

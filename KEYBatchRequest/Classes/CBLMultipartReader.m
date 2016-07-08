@@ -20,10 +20,6 @@
 #import "CBLMultipartReader.h"
 #import "CBLByteBuffer.h"
 
-#import "CollectionUtils.h"
-#import "Test.h"
-
-
 // Values of the _state ivar:
 enum {
     kAtStart,

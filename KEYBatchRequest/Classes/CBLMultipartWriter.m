@@ -16,10 +16,7 @@
 //  Modifications copyright (c) 2016 keyper GmbH
 
 #import "CBLMultipartWriter.h"
-#import "CBL_Attachment.h"
 #import "CBLGZip.h"
-#import "CollectionUtils.h"
-#import "Test.h"
 
 
 // Don't compress data shorter than this (not worth the CPU time, plus it might not shrink)
@@ -36,7 +33,7 @@
         _boundary = boundary ? [boundary copy] : [[NSUUID UUID] UUIDString];
         // Account for the final boundary to be written by -opened. Add its length now, because the
         // client is probably going to ask for my .length *before* it calls -open.
-        NSString* finalBoundaryStr = $sprintf(@"\r\n--%@--", _boundary);
+        NSString* finalBoundaryStr = [NSString stringWithFormat:@"\r\n--%@--", _boundary];
         _finalBoundary = [finalBoundaryStr dataUsingEncoding: NSUTF8StringEncoding];
         _length += _finalBoundary.length;
     }
@@ -50,7 +47,7 @@
 
 
 - (NSString*) contentType {
-    return $sprintf(@"%@; boundary=\"%@\"", _contentType, _boundary);
+    return [NSString stringWithFormat:@"%@; boundary=\"%@\"", _contentType, _boundary];
 }
 
 
@@ -59,7 +56,7 @@
 }
 
 - (void)setValue:(NSString *)value forNextPartsHeader:(NSString *)header {
-    NSMutableDictionary* headers = _nextPartsHeaders.mutableCopy ?: $mdict();
+    NSMutableDictionary* headers = _nextPartsHeaders.mutableCopy ?: NSMutableDictionary.new;
     [headers setValue: value forKey: header];
     _nextPartsHeaders = headers;
 }
@@ -100,28 +97,34 @@
 }
 
 
-- (CBLStatus) addAttachment: (CBL_Attachment*)attachment {
-    NSString* disposition = $sprintf(@"attachment; filename=%@",
-                                     CBLQuoteString(attachment.name));
-    [self setNextPartsHeaders: $dict({@"Content-Disposition", disposition},
-                                     {@"Content-Type", attachment.contentType},
-                                     {@"Content-Encoding", attachment.encodingName})];
-    uint64_t contentLength;
-    NSInputStream *contentStream = [attachment getContentStreamDecoded: NO
-                                                             andLength: &contentLength];
-    if (!contentStream)
-        return kCBLStatusAttachmentNotFound;
-    
-    uint64_t declaredLength = attachment.possiblyEncodedLength;
-    if (contentLength == 0)
-        contentLength = declaredLength;
-    else if (declaredLength != 0 && contentLength != declaredLength)
-        Warn(@"Attachment '%@' length mismatch; actually %llu, declared %llu",
-             attachment.name, contentLength, declaredLength);
-    
-    [self addStream: contentStream length: contentLength];
-    return kCBLStatusOK;
-}
+// Original code to add a CouchbaseLite Attachment. In order to make this compatible with
+// this library, we would have to create our own attachment object, and emulate part of
+// their CBL_Attachment behavior, e.g. getContentStreamDecoded:andLength:.
+//
+//- (CBLStatus) addAttachment: (CBL_Attachment*)attachment {
+//    NSString* disposition = [NSString stringWithFormat:@"attachment; filename=%@",
+//                             CBLQuoteString(attachment.name)];
+//    [self setNextPartsHeaders: @{
+//                                 @"Content-Disposition": disposition,
+//                                 @"Content-Type": attachment.contentType,
+//                                 @"Content-Encoding": attachment.encodingName
+//                                 }];
+//    uint64_t contentLength;
+//    NSInputStream *contentStream = [attachment getContentStreamDecoded: NO
+//                                                             andLength: &contentLength];
+//    if (!contentStream)
+//        return kCBLStatusAttachmentNotFound;
+//    
+//    uint64_t declaredLength = attachment.possiblyEncodedLength;
+//    if (contentLength == 0)
+//        contentLength = declaredLength;
+//    else if (declaredLength != 0 && contentLength != declaredLength)
+//        Warn(@"Attachment '%@' length mismatch; actually %llu, declared %llu",
+//             attachment.name, contentLength, declaredLength);
+//    
+//    [self addStream: contentStream length: contentLength];
+//    return kCBLStatusOK;
+//}
 
 
 - (void) opened {

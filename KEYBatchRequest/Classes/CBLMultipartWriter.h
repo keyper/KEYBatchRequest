@@ -39,7 +39,8 @@
 
 - (void) addGZippedData: (NSData*)data;
 
-- (CBLStatus) addAttachment: (CBL_Attachment*)attachment;
+// See commented out implementation for notes
+//- (CBLStatus) addAttachment: (CBL_Attachment*)attachment;
 
 /** Attaches the writer to the URL request.
     This calls -openForInputStream and sets the resulting input stream as the HTTPBodyStream of the request. It also sets the Content-Type header of the request. */
