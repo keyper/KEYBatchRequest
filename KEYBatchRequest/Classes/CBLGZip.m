@@ -121,7 +121,7 @@
         [output appendBytes: bytes length: len];
     }];
     if (gzip.status < CBLGZipStatusOK) {
-        Warn(@"GZip error %d %scompressing data", gzip.status, (compress ?"" :"de"));
+        NSLog(@"GZip error %d %scompressing data", gzip.status, (compress ?"" :"de"));
         return nil;
     }
     return output;

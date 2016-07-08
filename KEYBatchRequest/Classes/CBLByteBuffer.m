@@ -36,7 +36,7 @@
 #pragma mark - Actions
 
 - (void)advance:(NSUInteger)amount {
-    Assert(_offset + amount <= _data.length);
+    NSAssert(_offset + amount <= _data.length, @"offset + amount must not be greater than length");
     _offset += amount;
 }
 
@@ -103,7 +103,7 @@
 }
 
 - (NSData *)subdataWithRangeNoCopy:(NSRange)range {
-    Assert(NSMaxRange(range) <= self.bytesAvailable);
+    NSAssert(NSMaxRange(range) <= self.bytesAvailable, @"range must not be longer than bytesAvailable");
     return [[NSData alloc] initWithBytesNoCopy: _data.mutableBytes + _offset + range.location
                                         length: range.length
                                   freeWhenDone: NO];
