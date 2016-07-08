@@ -1,0 +1,6 @@
+framework module KEYBatchRequest {
+  umbrella header "KEYBatchRequest-umbrella.h"
+
+  export *
+  module * { export * }
+}

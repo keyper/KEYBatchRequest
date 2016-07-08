@@ -1,0 +1,22 @@
+{
+  "name": "KEYBatchRequest",
+  "version": "0.1.0",
+  "summary": "A short description of KEYBatchRequest.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/KEYBatchRequest",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Manuel Maly": "manuel.maly@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/KEYBatchRequest.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "KEYBatchRequest/Classes/**/*"
+}
