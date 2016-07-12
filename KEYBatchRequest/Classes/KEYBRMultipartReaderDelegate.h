@@ -11,7 +11,9 @@
 
 @interface KEYBRMultipartReaderDelegate : NSObject <CBLMultipartReaderDelegate>
 
-- (instancetype)initWithOriginalRequests:(NSArray *)originalRequests finishBlock:(void (^)())finishBlock;
+- (instancetype)initWithOriginalRequests:(NSArray *)originalRequests;
 - (void)responseDataForRequest:(NSURLRequest *)request responseData:(NSData **)responseData response:(NSURLResponse **)response error:(NSError **)error;
+
+@property (copy, nonatomic) void (^finishBlock)();
 
 @end

@@ -82,13 +82,18 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
     [[session dataTaskWithRequest:batchRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
         
         NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
-        if ([HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
+        if (![HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
+            [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
+                CompletionHandler completionHandler = self.completionHandlers[idx];
+                completionHandler(nil, nil, [NSError errorWithDomain:@"" code:0 userInfo:nil]);
+            }];
             return;
         }
         
         NSString *contentType = HTTPResponse.allHeaderFields[@"Content-Type"];
         
-        KEYBRMultipartReaderDelegate *readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests finishBlock:^{
+        KEYBRMultipartReaderDelegate *readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests];
+        readerDelegate.finishBlock = ^{
             
             [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
                 CompletionHandler completionHandler = self.completionHandlers[idx];
@@ -100,7 +105,7 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
                 completionHandler(response, responseData, error ?: subResponseError);
             }];
             
-        }];
+        };
         
         CBLMultipartReader *reader = [[CBLMultipartReader alloc] initWithContentType:contentType delegate:readerDelegate];
         [reader appendData:data];

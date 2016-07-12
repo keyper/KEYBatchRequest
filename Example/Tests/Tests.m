@@ -37,7 +37,7 @@ describe(@"Multipart Writer", ^{
                                              "Content-Type: %@\r\n\r\n"
                                              "GET %@ HTTP/1.1\r\n"
                                              "Host: %@\r\n"
-                                             "Authorization: %@\r\n\r\n"
+                                             "Authorization: %@\r\n\r\n\r\n"
                                              "--%@--";
         NSString *expectedOutcome = [NSString stringWithFormat:expectedOutcomeTemplate, boundary, subRequestContentType, URL.path, URL.host, authHeader, boundary];
         

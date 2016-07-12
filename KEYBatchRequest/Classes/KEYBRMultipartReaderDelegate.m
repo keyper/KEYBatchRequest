@@ -12,16 +12,14 @@
 
 @property (copy, nonatomic) NSArray *originalRequests; // order in batch response is guaranteed to be the same as in the request
 @property (strong, nonatomic) NSMutableArray *responseDataItems;
-@property (copy, nonatomic) void (^finishBlock)();
 
 @end
 
 @implementation KEYBRMultipartReaderDelegate
 
-- (instancetype)initWithOriginalRequests:(NSArray *)originalRequests finishBlock:(void (^)())finishBlock {
+- (instancetype)initWithOriginalRequests:(NSArray *)originalRequests {
     if ((self = [super init])) {
         self.originalRequests = originalRequests;
-        self.finishBlock = finishBlock;
     }
     
     return self;
@@ -82,7 +80,6 @@
     // BODY CONTENT OF 1st REQUEST
     // --c326f19c-fcbe-4d25-9281-5dc97e826e75--
     
-    NSString *boundary = nil;
     NSString *HTTPVersion = nil;
     NSInteger statusCode = 0;
     NSMutableDictionary *headers = NSMutableDictionary.new;
@@ -97,20 +94,8 @@
     NSCharacterSet *numbers = [NSCharacterSet decimalDigitCharacterSet];
     NSCharacterSet *alphanumeric = [NSCharacterSet alphanumericCharacterSet];
     
-    // make sure we encounter -- first
-    [scanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"-"] intoString:nil];
-    // scan boundary
-    [scanner scanUpToCharactersFromSet:newLine intoString:&boundary];
-    
-    if (!boundary) {
-        return;
-    }
-    
-    // skip newline
-    [scanner scanCharactersFromSet:newLine intoString:nil];
-    
     // skip HTTP/
-    [scanner scanString:@"HTTP/1.1 " intoString:nil];
+    [scanner scanString:@"HTTP/" intoString:nil];
     // scan http version
     [scanner scanCharactersFromSet:[[NSCharacterSet whitespaceCharacterSet] invertedSet] intoString:&HTTPVersion];
     // skip whitespace between http version and status code
@@ -169,7 +154,8 @@
     }
     
     // scan body
-    [scanner scanUpToString:boundary intoString:&payload];
+    
+    payload = [rawString substringFromIndex:scanner.scanLocation];
     
     if (responseData) {
         *responseData = [payload dataUsingEncoding:NSUTF8StringEncoding];
