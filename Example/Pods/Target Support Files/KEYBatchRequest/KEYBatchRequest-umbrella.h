@@ -7,6 +7,8 @@
 #import "CBLMultipartWriter.h"
 #import "CBLMultiStreamWriter.h"
 #import "CBLStatus.h"
+#import "KEYBRBatchRequest.h"
+#import "KEYBRMultipartReaderDelegate.h"
 
 FOUNDATION_EXPORT double KEYBatchRequestVersionNumber;
 FOUNDATION_EXPORT const unsigned char KEYBatchRequestVersionString[];
