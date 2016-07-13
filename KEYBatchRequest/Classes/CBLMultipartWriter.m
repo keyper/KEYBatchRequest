@@ -78,7 +78,9 @@
     [part appendString:@"Content-Type: application/http; msgtype=request\r\n\r\n"];
     
     // Path
-    [part appendString:[NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", request.HTTPMethod, request.URL.path]];
+    NSURLComponents *c = [NSURLComponents componentsWithURL:request.URL resolvingAgainstBaseURL:NO];
+    NSString *path = [NSString stringWithFormat:@"%@?%@", c.path, c.query];
+    [part appendString:[NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", request.HTTPMethod, path]];
     
     // Host
     [part appendString:[NSString stringWithFormat:@"Host: %@\r\n", request.URL.host]];
