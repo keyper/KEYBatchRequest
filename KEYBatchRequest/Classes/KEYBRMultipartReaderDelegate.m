@@ -33,6 +33,8 @@
     }
     
     [self.responseDataItems addObject:NSNull.null];
+    
+    return YES;
 }
 
 /** This method is called to append data to a part's body. */
@@ -46,6 +48,8 @@
         [existingData appendData:data];
         [self.responseDataItems replaceObjectAtIndex:currentItemIndex withObject:existingData];
     }
+    
+    return YES;
 }
 
 /** This method is called when a part is complete. */
@@ -53,7 +57,10 @@
     
     if (self.responseDataItems.count == self.originalRequests.count && self.finishBlock) {
         self.finishBlock();
+        return NO;
     }
+    
+    return YES;
 }
 
 - (void)responseDataForRequest:(NSURLRequest *)request responseData:(NSData **)responseData response:(NSURLResponse **)response error:(NSError **)error {
