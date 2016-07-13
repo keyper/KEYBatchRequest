@@ -16,6 +16,7 @@
 //  Modifications copyright (c) 2016 keyper GmbH
 
 #import "CBLMultiStreamWriter.h"
+#import "KEYBRBatchRequestGlobals.h"
 
 
 #define kDefaultBufferSize 32768
@@ -68,7 +69,7 @@
 }
 
 - (void) addStream: (NSInputStream*)stream {
-    NSLog(@"%@: adding stream of unknown length: %@", self, stream);
+    DLog(@"%@: adding stream of unknown length: %@", self, stream);
     [_inputs addObject: stream];
     _length = -1;  // length is now unknown
 }
@@ -122,7 +123,7 @@
     _input = CFBridgingRelease(cfInput);
     _output = CFBridgingRelease(cfOutput);
 #endif
-    NSLog(@"%@: Opened input=%p, output=%p", self, _input, _output);
+    DLog(@"%@: Opened input=%p, output=%p", self, _input, _output);
     [self opened];
     return _input;
 }
@@ -138,7 +139,7 @@
 
 
 - (void) close {
-    NSLog(@"%@: Closed", self);
+    DLog(@"%@: Closed", self);
     [_output close];
     _output.delegate = nil;
     
@@ -202,7 +203,7 @@
 // Set my .error property from 'stream's error.
 - (void) setErrorFrom: (NSStream*)stream {
     NSError* error = stream.streamError;
-    NSLog(@"%@: Error on %@: %@", self, stream, error.description);
+    DLog(@"%@: Error on %@: %@", self, stream, error.description);
     if (error && !_error)
         self.error = error;
 }
@@ -213,7 +214,7 @@
     NSInteger totalBytesRead = 0;
     while (len > 0 && _currentInput) {
         NSInteger bytesRead = [_currentInput read: buffer maxLength: len];
-        NSLog(@"%@:     read %d bytes from %@", self, (int)bytesRead, _currentInput);
+        DLog(@"%@:     read %d bytes from %@", self, (int)bytesRead, _currentInput);
         if (bytesRead > 0) {
             // Got some data from the stream:
             totalBytesRead += bytesRead;
@@ -234,14 +235,14 @@
 
 // Read enough bytes from the aggregated input to refill my _buffer. Returns success/failure.
 - (BOOL) refillBuffer {
-    NSLog(@"%@:   Refilling buffer", self);
+    DLog(@"%@:   Refilling buffer", self);
     NSInteger bytesRead = [self read: _buffer+_bufferLength maxLength: _bufferSize-_bufferLength];
     if (bytesRead <= 0) {
-        NSLog(@"%@:     at end of input, can't refill", self);
+        DLog(@"%@:     at end of input, can't refill", self);
         return NO;
     }
     _bufferLength += bytesRead;
-    NSLog(@"%@:   refilled buffer to %u bytes", self, (unsigned)_bufferLength);
+    DLog(@"%@:   refilled buffer to %u bytes", self, (unsigned)_bufferLength);
     //LogTo(MultiStreamWriter, @"%@:   buffer is now \"%.*s\"", self, _bufferLength, _buffer);
     return YES;
 }
@@ -251,7 +252,7 @@
 - (BOOL) writeToOutput {
     NSParameterAssert(_bufferLength > 0);
     NSInteger bytesWritten = [_output write: _buffer maxLength: _bufferLength];
-    NSLog(@"%@:   Wrote %d (of %u) bytes to _output (total %lld of %lld)",
+    DLog(@"%@:   Wrote %d (of %u) bytes to _output (total %lld of %lld)",
           self, (int)bytesWritten, (unsigned)_bufferLength, _totalBytesWritten+bytesWritten, _length);
     if (bytesWritten <= 0) {
         [self setErrorFrom: _output];
@@ -272,7 +273,7 @@
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)event {
     if (stream != _output)
         return;
-    NSLog(@"%@: Received event 0x%x", self, (unsigned)event);
+    DLog(@"%@: Received event 0x%x", self, (unsigned)event);
     switch (event) {
         case NSStreamEventOpenCompleted:
             if ([self openNextInput])
@@ -282,12 +283,12 @@
         case NSStreamEventHasSpaceAvailable:
             if (_input && _input.streamStatus < NSStreamStatusOpen) {
                 // CFNetwork workaround; see https://github.com/couchbaselabs/TouchDB-iOS/issues/99
-                NSLog(@"%@:   Input isn't open; waiting...", self);
+                DLog(@"%@:   Input isn't open; waiting...", self);
                 [self performSelector: @selector(retryWrite:) withObject: stream afterDelay: 0.001];
             } else if (![self writeToOutput]) {
-                NSLog(@"%@:   At end -- closing _output!", self);
+                DLog(@"%@:   At end -- closing _output!", self);
                 if (_totalBytesWritten != _length && !_error)
-                    NSLog(@"%@ wrote %lld bytes, but expected length was %lld!",
+                    DLog(@"%@ wrote %lld bytes, but expected length was %lld!",
                          self, _totalBytesWritten, _length);
                 [self close];
             }

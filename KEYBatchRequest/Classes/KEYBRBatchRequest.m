@@ -11,6 +11,8 @@
 #import "KEYBRMultipartReaderDelegate.h"
 #import "CBLMultipartWriter.h"
 #import "CBLMultipartReader.h"
+#import <QuartzCore/CABase.h>
+#import "KEYBRBatchRequestStats.h"
 
 typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData, NSError *error);
 
@@ -77,9 +79,18 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
     batchRequest.HTTPMethod = @"POST";
     [batchRequest setValue:batchRequestContentType forHTTPHeaderField:@"Content-Type"];
     batchRequest.HTTPBody = writer.allOutput;
-//    batchRequest.HTTPBodyStream = writer.openForInputStream;
+    // Might give slightly better performance?:
+    // batchRequest.HTTPBodyStream = writer.openForInputStream;
+    
+    CFTimeInterval batchRequestStartTime = CACurrentMediaTime();
     
     [[session dataTaskWithRequest:batchRequest completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        CFTimeInterval batchRequestEndTime = CACurrentMediaTime();
+        
+        KEYBRBatchRequestStats *stats = KEYBRBatchRequestStats.new;
+        stats.startTime = batchRequestStartTime;
+        stats.endTime = batchRequestEndTime;
         
         NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
         if (![HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
@@ -87,13 +98,17 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
                 CompletionHandler completionHandler = self.completionHandlers[idx];
                 completionHandler(nil, nil, [NSError errorWithDomain:@"" code:0 userInfo:nil]);
             }];
+            [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
             return;
         }
-        
+
         NSString *contentType = HTTPResponse.allHeaderFields[@"Content-Type"];
         
         KEYBRMultipartReaderDelegate *readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests];
         readerDelegate.finishBlock = ^{
+            
+            NSMutableArray *requests = NSMutableArray.new;
+            NSMutableArray *responses = NSMutableArray.new;
             
             [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
                 CompletionHandler completionHandler = self.completionHandlers[idx];
@@ -103,8 +118,17 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
                 [readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
                 
                 completionHandler(response, responseData, error ?: subResponseError);
+                
+                if (response) {
+                    [responses addObject:response];
+                    [requests addObject:request];
+                }
             }];
             
+            stats.requests = requests;
+            stats.responses = responses;
+            
+            [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
         };
         
         CBLMultipartReader *reader = [[CBLMultipartReader alloc] initWithContentType:contentType delegate:readerDelegate];
