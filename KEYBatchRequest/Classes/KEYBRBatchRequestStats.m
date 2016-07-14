@@ -8,6 +8,8 @@
 
 #import "KEYBRBatchRequestStats.h"
 
+NSString * const KEYBRBatchRequestStatsNotificationName = @"KEYBRBatchRequestStatsNotification";
+
 @implementation KEYBRBatchRequestStats
 
 @end

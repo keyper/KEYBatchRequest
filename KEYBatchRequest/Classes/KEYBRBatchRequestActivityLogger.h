@@ -10,4 +10,10 @@
 
 @interface KEYBRBatchRequestActivityLogger : NSObject
 
++ (instancetype)sharedLogger;
+
+- (void)startLogging;
+
+- (void)stopLogging;
+
 @end
