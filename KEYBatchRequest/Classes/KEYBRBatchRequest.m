@@ -93,10 +93,10 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
         stats.endTime = batchRequestEndTime;
         
         NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
-        if (![HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
+        if (error || !response || ![HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
             [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
                 CompletionHandler completionHandler = self.completionHandlers[idx];
-                completionHandler(nil, nil, [NSError errorWithDomain:@"" code:0 userInfo:nil]);
+                completionHandler(nil, nil, [NSError errorWithDomain:error.domain ?: @"" code:error ? error.code : 0 userInfo:error.userInfo]);
             }];
             [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
             return;
