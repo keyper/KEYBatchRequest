@@ -99,7 +99,6 @@
     scanner.charactersToBeSkipped = nil;
     NSCharacterSet *newLine = [NSCharacterSet newlineCharacterSet];
     NSCharacterSet *numbers = [NSCharacterSet decimalDigitCharacterSet];
-    NSCharacterSet *alphanumeric = [NSCharacterSet alphanumericCharacterSet];
     
     // skip HTTP/
     [scanner scanString:@"HTTP/" intoString:nil];

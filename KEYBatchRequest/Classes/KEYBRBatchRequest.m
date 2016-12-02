@@ -104,8 +104,8 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
 
         NSString *contentType = HTTPResponse.allHeaderFields[@"Content-Type"];
         
-        KEYBRMultipartReaderDelegate *readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests];
-        readerDelegate.finishBlock = ^{
+        self.readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests];
+        self.readerDelegate.finishBlock = ^{
             
             NSMutableArray *requests = NSMutableArray.new;
             NSMutableArray *responses = NSMutableArray.new;
@@ -115,7 +115,7 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
                 NSData *responseData = nil;
                 NSURLResponse *response = nil;
                 NSError *subResponseError = nil;
-                [readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
+                [self.readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
                 
                 completionHandler(response, responseData, error ?: subResponseError);
                 
@@ -131,7 +131,7 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
             [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
         };
         
-        CBLMultipartReader *reader = [[CBLMultipartReader alloc] initWithContentType:contentType delegate:readerDelegate];
+        CBLMultipartReader *reader = [[CBLMultipartReader alloc] initWithContentType:contentType delegate:self.readerDelegate];
         [reader appendData:data];
         
     }] resume];

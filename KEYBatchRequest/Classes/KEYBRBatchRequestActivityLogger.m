@@ -49,7 +49,7 @@
     [stats.responses enumerateObjectsUsingBlock:^(NSHTTPURLResponse * _Nonnull response, NSUInteger idx, BOOL * _Nonnull stop) {
         NSURLRequest *request = stats.requests[idx];
         
-        NSLog(@"-- %lu %@ '%@'", response.statusCode, request.HTTPMethod, request.URL.absoluteString);
+        NSLog(@"-- %lu %@ '%@'", (long unsigned)response.statusCode, request.HTTPMethod, request.URL.absoluteString);
     }];
 }
 
