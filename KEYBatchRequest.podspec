@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'KEYBatchRequest'
-  s.version          = '0.1.0'
-  s.summary          = 'A short description of KEYBatchRequest.'
+  s.version          = '1.0.0'
+  s.summary          = 'Library for handling batch requests via multipart/mixed.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,13 +18,14 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+If you need a convenient way of bundling requests in a multipart/mixed request, this library is for you.
+It contains carefully adapted code from https://github.com/couchbase/couchbase-lite-ios.
                        DESC
 
   s.homepage         = 'https://github.com/<GITHUB_USERNAME>/KEYBatchRequest'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Manuel Maly' => 'manuel.maly@gmail.com' }
+  s.author           = { 'Manuel Maly' => 'manuel@creativepragmatics.com' }
   s.source           = { :git => 'https://github.com/<GITHUB_USERNAME>/KEYBatchRequest.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
