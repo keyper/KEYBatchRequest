@@ -23,7 +23,7 @@ We use it to bundle requests directed at a .NET server, so the formatting should
 It contains carefully adapted code from https://github.com/couchbase/couchbase-lite-ios.
                        DESC
 
-  s.homepage         = 'https://github.com/<GITHUB_USERNAME>/KEYBatchRequest'
+  s.homepage         = 'https://github.com/keyper/KEYBatchRequest'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Manuel Maly' => 'manuel@creativepragmatics.com' }
