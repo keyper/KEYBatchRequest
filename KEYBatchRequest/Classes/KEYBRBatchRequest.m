@@ -104,18 +104,19 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
 
         NSString *contentType = HTTPResponse.allHeaderFields[@"Content-Type"];
         
+        __weak __typeof(self) weakSelf = self;
         self.readerDelegate = [[KEYBRMultipartReaderDelegate alloc] initWithOriginalRequests:self.requests];
         self.readerDelegate.finishBlock = ^{
             
             NSMutableArray *requests = NSMutableArray.new;
             NSMutableArray *responses = NSMutableArray.new;
             
-            [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
-                CompletionHandler completionHandler = self.completionHandlers[idx];
+            [weakSelf.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
+                CompletionHandler completionHandler = weakSelf.completionHandlers[idx];
                 NSData *responseData = nil;
                 NSURLResponse *response = nil;
                 NSError *subResponseError = nil;
-                [self.readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
+                [weakSelf.readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
                 
                 completionHandler(response, responseData, error ?: subResponseError);
                 
