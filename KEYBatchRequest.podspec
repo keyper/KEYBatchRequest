@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
 
   s.description      = <<-DESC
 If you need a convenient way of bundling requests in a multipart/mixed request, this library is for you.
+We use it to bundle requests directed at a .NET server, so the formatting should be just right.
 It contains carefully adapted code from https://github.com/couchbase/couchbase-lite-ios.
                        DESC
 
