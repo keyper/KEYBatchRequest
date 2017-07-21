@@ -63,7 +63,7 @@
     return YES;
 }
 
-- (void)responseDataForRequest:(NSURLRequest *)request responseData:(NSData **)responseData response:(NSURLResponse **)response error:(NSError **)error {
+- (void)responseDataForRequest:(NSURLRequest *)request responseData:(NSData **)responseData response:(NSHTTPURLResponse **)response error:(NSError **)error {
     
     NSInteger idx = [self.originalRequests indexOfObject:request];
     if (idx == NSNotFound) {

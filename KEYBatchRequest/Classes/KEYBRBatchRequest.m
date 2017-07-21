@@ -79,6 +79,7 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
     batchRequest.HTTPMethod = @"POST";
     [batchRequest setValue:batchRequestContentType forHTTPHeaderField:@"Content-Type"];
     batchRequest.HTTPBody = writer.allOutput;
+    
     // Might give slightly better performance?:
     // batchRequest.HTTPBodyStream = writer.openForInputStream;
     
@@ -94,10 +95,19 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
         
         NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
         if (error || !response || ![HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
+            
+            NSError *internalError = [NSError errorWithDomain:error.domain ?: @"" code:error ? error.code : 0 userInfo:error.userInfo];
             [self.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
                 CompletionHandler completionHandler = self.completionHandlers[idx];
-                completionHandler(nil, nil, [NSError errorWithDomain:error.domain ?: @"" code:error ? error.code : 0 userInfo:error.userInfo]);
+                completionHandler(nil, nil, internalError);
             }];
+            
+            if ([HTTPResponse isKindOfClass:NSHTTPURLResponse.class]) {
+                self.completionHandler(((NSHTTPURLResponse *)HTTPResponse).statusCode == 401);
+            } else {
+                self.completionHandler(NO);
+            }
+            
             [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
             return;
         }
@@ -110,11 +120,12 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
             
             NSMutableArray *requests = NSMutableArray.new;
             NSMutableArray *responses = NSMutableArray.new;
+            __block BOOL unauthorizedAccessOccurred = NO;
             
             [weakSelf.requests enumerateObjectsUsingBlock:^(NSURLRequest *request, NSUInteger idx, BOOL * _Nonnull stop) {
                 CompletionHandler completionHandler = weakSelf.completionHandlers[idx];
                 NSData *responseData = nil;
-                NSURLResponse *response = nil;
+                NSHTTPURLResponse *response = nil;
                 NSError *subResponseError = nil;
                 [weakSelf.readerDelegate responseDataForRequest:request responseData:&responseData response:&response error:&subResponseError];
                 
@@ -123,11 +134,18 @@ typedef void (^CompletionHandler)(NSURLResponse *response, NSData *responseData,
                 if (response) {
                     [responses addObject:response];
                     [requests addObject:request];
+                    
+                    if (response.statusCode == 401) {
+                        unauthorizedAccessOccurred = YES;
+                    }
                 }
+                
             }];
             
             stats.requests = requests;
             stats.responses = responses;
+            
+            weakSelf.completionHandler(unauthorizedAccessOccurred);
             
             [NSNotificationCenter.defaultCenter postNotificationName:KEYBRBatchRequestStatsNotificationName object:stats userInfo:nil];
         };

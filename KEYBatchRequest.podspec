@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'KEYBatchRequest'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'Library for handling batch requests via multipart/mixed.'
 
 # This description is used to generate tags and improve search results.
