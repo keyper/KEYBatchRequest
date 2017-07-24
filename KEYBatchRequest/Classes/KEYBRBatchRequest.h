@@ -14,6 +14,8 @@
 
 - (void)sendWithURLSession:(NSURLSession *)session withBatchRequestEndpointRequest:(NSURLRequest *)endpointRequest;
 
+@property (nonatomic, copy) NSString *tag;
+
 @property (nonatomic, copy) void (^completionHandler)(BOOL unauthorizedAccessOccurred);
 
 @end
